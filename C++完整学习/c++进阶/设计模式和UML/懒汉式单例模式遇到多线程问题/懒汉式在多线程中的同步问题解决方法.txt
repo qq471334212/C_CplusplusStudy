@@ -1,0 +1,51 @@
+linux环境下解决方法
+
+方法1：加锁的经典懒汉实现：
+
+class singleton {
+ protected: singleton() 
+ { 
+  pthread_mutex_init(&mutex); 
+ } 
+private: static singleton* p;
+public: static pthread_mutex_t mutex; 
+static singleton* initance(); 
+}; 
+pthread_mutex_t singleton::mutex; 
+singleton* singleton::p = NULL; 
+singleton* singleton::initance() 
+{ 
+if (p == NULL) 
+{  
+  pthread_mutex_lock(&mutex); 
+  if (p == NULL) 
+  {
+  p = new singleton(); 
+  }
+  pthread_mutex_unlock(&mutex); 
+} 
+return p; 
+}
+方法2：内部静态变量的懒汉实现
+
+此方法也很容易实现，在instance函数里定义一个静态的实例，也可以保证拥有唯一实例，在返回时只需要返回其指针就可以了。推荐这种实现方法，真得非常简单。
+
+class singleton 
+{ 
+protected: singleton() 
+     { 
+        pthread_mutex_init(&mutex); 
+      } 
+public: 
+static pthread_mutex_t mutex; 
+static singleton* initance(); 
+int a; 
+}; 
+pthread_mutex_t singleton::mutex;
+singleton* singleton::initance() 
+{ 
+pthread_mutex_lock(&mutex); 
+static singleton obj; 
+pthread_mutex_unlock(&mutex); 
+return &obj; 
+}
